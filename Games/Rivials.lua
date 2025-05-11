@@ -4,6 +4,7 @@ local Settings = {
         Enabled = true;
         Teamcheck = false;
         Transparency = .7;
+        IgnoreDead = true;
         EnemyColor = Color3.fromRGB(255, 0, 0);
         EnemyColorRainbow = true;
         TeamColor = Color3.fromRGB(0, 255, 0);
@@ -15,7 +16,7 @@ local Settings = {
         Radius = 200;
         TargetPart = 'Head';
         VisibleCheck = true;
-        TimeToTarget = .5;
+        TimeToTarget = .3;
         Teamcheck = true;
         Color = Color3.fromRGB(225, 106, 255);
         Rainbow = true;
@@ -143,6 +144,15 @@ function UpdatePlayerHighlight(player)
         color = (isTeammate) and Settings.Highlight.TeamColor or Settings.Highlight.EnemyColor
     end
 
+    if(player.Character and player.Character:FindFirstChild('Humanoid') and player.Character:FindFirstChild('Humanoid').Health == 0) then
+        if(Settings.Highlight.IgnoreDead) then
+            hl.FillTransparency = 1
+            hl.OutlineTransparency = 1
+            return
+        end
+        color = Color3.fromRGB(0, 0, 0)
+    end
+
     hl.FillTransparency = (isTeammate and Settings.Highlight.Teamcheck) and 1 or Settings.Highlight.Transparency
     hl.OutlineTransparency = (isTeammate and Settings.Highlight.Teamcheck) and 1 or 0
     hl.OutlineColor = color
@@ -156,6 +166,7 @@ function FindClosestPlayer()
 
     for _, v in pairs(PlayersService:GetPlayers()) do 
         if((Settings.Aimbot.Teamcheck and IsTeammate(v)) or (v == LocalPlayer) or (v.Character == nil) or (v.Character:FindFirstChild(Settings.Aimbot.TargetPart) == nil)) then continue end
+        if(not v.Character:FindFirstChild('Humanoid') or v.Character:FindFirstChild('Humanoid').Health == 0) then continue end
 
         local screenPoint, _ = WorldToScreen(Camera, v.Character:FindFirstChild(Settings.Aimbot.TargetPart).CFrame.Position)
         if(screenPoint.Z < 0) then continue end
@@ -199,9 +210,9 @@ end
 
 -- Rerun script on teleport
 local con = LocalPlayer.OnTeleport:Connect(function(state)
-    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/AshtonsAlt/Roblox/refs/heads/main/Games/Rivials.lua"))
-    con:Disconnect()
-    table.remove(Internals.Connections, con)
+    if state == Enum.TeleportState.Started then
+        queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/AshtonsAlt/Roblox/refs/heads/main/Games/Rivials.lua"))
+    end
 end)
 table.insert(Internals.Connections, con)
 
