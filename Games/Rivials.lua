@@ -92,7 +92,6 @@ end
 getgenv().RivalsScript.Unload = Unload
 
 -- Functions
-
 function IsTeammate(player)
     if(player.Character and player.Character:FindFirstChild('HumanoidRootPart')) then
         return player.Character.HumanoidRootPart:FindFirstChild('TeammateLabel') ~= nil
@@ -197,6 +196,14 @@ function IsVisible(player)
 end
 
 -- Main
+
+-- Rerun script on teleport
+local con = LocalPlayer.OnTeleport:Connect(function(state)
+    queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/AshtonsAlt/Roblox/refs/heads/main/Games/Rivials.lua"))
+    con:Disconnect()
+    table.remove(Internals.Connections, con)
+end)
+table.insert(Internals.Connections, con)
 
 -- Settup Highlight
 if(Settings.Highlight.Enabled) then
